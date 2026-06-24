@@ -1,0 +1,222 @@
+{
+  "meta": {
+    "version": "1.0",
+    "date": "2026-06-23",
+    "entity": "WAFI Group · Monrovia Management LLC",
+    "nodes": ["Monrovia Management LLC — NYC", "Garsinii Logistics Operations Ltd — Monrovia, LBR", "WAFI Origin Operations — Oku Highlands & Akeh Region, CMR"]
+  },
+  "commodities": {
+    "Arabica Coffee": {
+      "sector": "agri",
+      "tier": 1,
+      "icon": "◆",
+      "color": "#3ECF8E",
+      "hedge": "ICE KC",
+      "unit": "$/kg",
+      "spot": 6.10,
+      "chg": 0.12,
+      "origin": "Oku Highlands, CMR",
+      "grades": ["AA", "A", "B", "C"],
+      "desc": "Specialty single-origin"
+    },
+    "Liberica Coffee": {
+      "sector": "agri",
+      "tier": 1,
+      "icon": "◈",
+      "color": "#2EBA7A",
+      "hedge": "OTC/Spot",
+      "unit": "$/kg",
+      "spot": 8.40,
+      "chg": 0.35,
+      "origin": "Bong County, LBR",
+      "grades": ["AA", "A", "B"],
+      "desc": "<1.5% global supply"
+    },
+    "Robusta Coffee": {
+      "sector": "agri",
+      "tier": 1,
+      "icon": "◉",
+      "color": "#26A060",
+      "hedge": "ICE RC",
+      "unit": "$/kg",
+      "spot": 3.15,
+      "chg": 0.05,
+      "origin": "Nimba Valley, LBR",
+      "grades": ["A", "B", "C"],
+      "desc": "Volume grade"
+    },
+    "Cocoa": {
+      "sector": "agri",
+      "tier": 1,
+      "icon": "❋",
+      "color": "#C2692A",
+      "hedge": "ICE CC",
+      "unit": "$/kg",
+      "spot": 4.85,
+      "chg": 0.28,
+      "origin": "Oku Highlands, CMR",
+      "grades": ["Fine", "Superior", "Std"],
+      "desc": "Fine flavour, fermented"
+    },
+    "Raw Honey": {
+      "sector": "agri",
+      "tier": 1,
+      "icon": "⬡",
+      "color": "#F5A623",
+      "hedge": "OTC/Spot",
+      "unit": "$/kg",
+      "spot": 9.20,
+      "chg": 0.15,
+      "origin": "Akeh Region, CMR",
+      "grades": ["Raw", "Infused", "Medical"],
+      "desc": "Medicinal & premium"
+    }
+  },
+  "market_prices": [
+    {
+      "id": "arabica",
+      "name": "Arabica Coffee",
+      "origin": "Oku Highlands, CMR",
+      "unit": "lb",
+      "price": 22.10,
+      "prev_close": 22.85,
+      "change_pct": -3.28,
+      "high_24h": 23.20,
+      "low_24h": 21.90,
+      "volume": "1.2K bags"
+    },
+    {
+      "id": "liberica",
+      "name": "Liberica Coffee",
+      "origin": "Bong County, LBR",
+      "unit": "lb",
+      "price": 29.50,
+      "prev_close": 28.80,
+      "change_pct": 2.43,
+      "high_24h": 30.10,
+      "low_24h": 28.40,
+      "volume": "340 bags"
+    },
+    {
+      "id": "robusta",
+      "name": "Robusta Coffee",
+      "origin": "Nimba Valley, LBR",
+      "unit": "lb",
+      "price": 8.20,
+      "prev_close": 8.00,
+      "change_pct": 2.50,
+      "high_24h": 8.40,
+      "low_24h": 7.95,
+      "volume": "820 bags"
+    },
+    {
+      "id": "cocoa",
+      "name": "Cocoa",
+      "origin": "Oku Highlands, CMR",
+      "unit": "MT",
+      "price": 7840,
+      "prev_close": 7620,
+      "change_pct": 2.89,
+      "high_24h": 7910,
+      "low_24h": 7580,
+      "volume": "12.4K MT"
+    },
+    {
+      "id": "honey",
+      "name": "Raw Honey",
+      "origin": "Akeh Region, CMR",
+      "unit": "kg",
+      "price": 14.20,
+      "prev_close": 13.90,
+      "change_pct": 2.16,
+      "high_24h": 14.50,
+      "low_24h": 13.75,
+      "volume": "8.2T"
+    }
+  ],
+  "orders": {
+    "sell": [
+      { "id": "F001", "name": "Garsinii Farm",      "origin": "Oku Highlands, CMR", "commodity": "Arabica Coffee",  "grade": "AA",       "qty": 180, "price": 6.50,  "type": "spot",    "delivery_date": null,       "status": "open", "date": "2026-06-05" },
+      { "id": "F002", "name": "Oku Highlands Est.", "origin": "Oku, CMR",           "commodity": "Cocoa",           "grade": "Fine",     "qty": 200, "price": 4.90,  "type": "spot",    "delivery_date": null,       "status": "open", "date": "2026-06-05" },
+      { "id": "F003", "name": "Bong County Farm",   "origin": "Bong, LBR",          "commodity": "Liberica Coffee", "grade": "AA",       "qty": 80,  "price": 8.20,  "type": "spot",    "delivery_date": null,       "status": "open", "date": "2026-06-05" },
+      { "id": "F004", "name": "Wouri Basin Farm",   "origin": "Wouri, CMR",         "commodity": "Cocoa",           "grade": "Superior", "qty": 350, "price": 4.70,  "type": "forward", "delivery_date": "2026-08-15","status": "open", "date": "2026-06-05" },
+      { "id": "F005", "name": "Nimba Valley",       "origin": "Nimba, LBR",         "commodity": "Robusta Coffee",  "grade": "A",        "qty": 400, "price": 3.20,  "type": "forward", "delivery_date": "2026-10-15","status": "open", "date": "2026-06-05" },
+      { "id": "F006", "name": "Akeh Honey Co-op",   "origin": "Akeh, CMR",          "commodity": "Raw Honey",       "grade": "Raw",      "qty": 60,  "price": 9.00,  "type": "spot",    "delivery_date": null,       "status": "open", "date": "2026-06-05" },
+      { "id": "F007", "name": "Manyu Estate",       "origin": "Manyu, CMR",         "commodity": "Cocoa",           "grade": "Fine",     "qty": 150, "price": 5.10,  "type": "spot",    "delivery_date": null,       "status": "open", "date": "2026-06-05" },
+      { "id": "F008", "name": "Tole Arabica Farm",  "origin": "Oku, CMR",           "commodity": "Arabica Coffee",  "grade": "A",        "qty": 120, "price": 6.20,  "type": "forward", "delivery_date": "2026-09-01","status": "open", "date": "2026-06-05" },
+      { "id": "F009", "name": "Akeh Premium Honey", "origin": "Akeh, CMR",          "commodity": "Raw Honey",       "grade": "Medical",  "qty": 30,  "price": 10.50, "type": "spot",    "delivery_date": null,       "status": "open", "date": "2026-06-05" },
+      { "id": "F010", "name": "Lofa Valley Farm",   "origin": "Lofa, LBR",          "commodity": "Liberica Coffee", "grade": "A",        "qty": 95,  "price": 7.90,  "type": "forward", "delivery_date": "2026-08-01","status": "open", "date": "2026-06-05" }
+    ],
+    "buy": [
+      { "id": "B001", "name": "Dandelion Chocolate","location": "San Francisco, CA", "commodity": "Cocoa",           "grade_min": "Fine",     "qty": 100, "bid": 5.20, "type": "spot",    "need_by": null,        "status": "open", "date": "2026-06-05" },
+      { "id": "B002", "name": "Valrhona USA",        "location": "New York, NY",      "commodity": "Cocoa",           "grade_min": "Fine",     "qty": 180, "bid": 5.00, "type": "spot",    "need_by": null,        "status": "open", "date": "2026-06-05" },
+      { "id": "B003", "name": "Counter Culture",     "location": "Durham, NC",        "commodity": "Liberica Coffee", "grade_min": "AA",       "qty": 100, "bid": 8.60, "type": "spot",    "need_by": null,        "status": "open", "date": "2026-06-05" },
+      { "id": "B004", "name": "Onyx Coffee Lab",     "location": "Bentonville, AR",   "commodity": "Arabica Coffee",  "grade_min": "AA",       "qty": 200, "bid": 6.40, "type": "forward", "need_by": "2026-09-15","status": "open", "date": "2026-06-05" },
+      { "id": "B005", "name": "Intelligentsia",      "location": "Chicago, IL",       "commodity": "Robusta Coffee",  "grade_min": "A",        "qty": 300, "bid": 3.10, "type": "forward", "need_by": "2026-11-01","status": "open", "date": "2026-06-05" },
+      { "id": "B006", "name": "Harney & Sons",       "location": "Millerton, NY",     "commodity": "Raw Honey",       "grade_min": "Raw",      "qty": 50,  "bid": 8.80, "type": "spot",    "need_by": null,        "status": "open", "date": "2026-06-05" },
+      { "id": "B007", "name": "Nestle Cocoa Plan",   "location": "New York, NY",      "commodity": "Cocoa",           "grade_min": "Superior", "qty": 400, "bid": 4.75, "type": "forward", "need_by": "2026-09-01","status": "open", "date": "2026-06-05" },
+      { "id": "B008", "name": "Prospect Coffee NYC", "location": "Brooklyn, NY",      "commodity": "Liberica Coffee", "grade_min": "A",        "qty": 50,  "bid": 8.20, "type": "spot",    "need_by": null,        "status": "open", "date": "2026-06-05" },
+      { "id": "B009", "name": "Stumptown Coffee",    "location": "Portland, OR",      "commodity": "Arabica Coffee",  "grade_min": "AA",       "qty": 150, "bid": 6.30, "type": "spot",    "need_by": null,        "status": "open", "date": "2026-06-05" },
+      { "id": "B010", "name": "Blue Bottle Coffee",  "location": "Oakland, CA",       "commodity": "Robusta Coffee",  "grade_min": "A",        "qty": 200, "bid": 3.05, "type": "forward", "need_by": "2026-10-01","status": "open", "date": "2026-06-05" }
+    ]
+  },
+  "vessels": [
+    { "name": "MV ABIDJAN STAR",   "type": "General Cargo", "flag": "LR", "status": "UNDERWAY", "route": "Monrovia → Baltimore", "eta": "2026-07-14", "cargo": "Cocoa / Coffee",   "heading_deg": 312, "speed_kn": 11.4, "draft_m": 6.2 },
+    { "name": "MV WEST CAPE",      "type": "Bulk Carrier",  "flag": "PA", "status": "AT PORT",  "route": "Tema → New York",      "eta": null,         "cargo": "Iron Ore",          "heading_deg": null,"speed_kn": 0,    "draft_m": 9.1 },
+    { "name": "MV OKUBO MARU",     "type": "Reefer",        "flag": "JP", "status": "UNDERWAY", "route": "Douala → Rotterdam",   "eta": "2026-07-09", "cargo": "Cocoa Butter",      "heading_deg": 28,  "speed_kn": 14.1, "draft_m": 5.8 },
+    { "name": "MV LOME EXPRESS",   "type": "Container",     "flag": "TG", "status": "DEPARTED", "route": "Lome → Newark",        "eta": "2026-07-19", "cargo": "Mixed Agri",        "heading_deg": 295, "speed_kn": 16.2, "draft_m": 7.4 }
+  ],
+  "shipments": [
+    { "id": "SHP-2601", "vessel": "MV ATLANTIC PALM",    "flag": "LR", "origin": "Monrovia, LBR",   "dest": "Port Newark, NJ", "commodity": "Liberica Coffee",    "containers": "4 x 20FT", "status": "in-transit", "eta": "2026-06-18", "departure": "2026-05-29", "days_at_sea": 7,  "total_days": 20, "freight_rate_usd": 2840, "rate_change": 120  },
+    { "id": "SHP-2602", "vessel": "MV CAMEROONIAN STAR", "flag": "CM", "origin": "Douala, CMR",     "dest": "Baltimore, MD",   "commodity": "Arabica + Cocoa",    "containers": "6 x 20FT", "status": "loading",    "eta": "2026-07-02", "departure": "2026-06-07", "days_at_sea": 0,  "total_days": 25, "freight_rate_usd": 3100, "rate_change": -80  },
+    { "id": "SHP-2603", "vessel": "MV FREEPORT GRACE",   "flag": "LR", "origin": "Port Newark, NJ", "dest": "Monrovia, LBR",   "commodity": "Equipment + Supplies","containers": "2 x 40FT", "status": "arrived",    "eta": "2026-06-01", "departure": "2026-05-10", "days_at_sea": 22, "total_days": 22, "freight_rate_usd": 2600, "rate_change": 0    },
+    { "id": "SHP-2604", "vessel": "MV BIGHT CARRIER",    "flag": "NG", "origin": "Tema, GHA",       "dest": "Rotterdam, NLD",  "commodity": "Cocoa Beans",         "containers": "8 x 20FT", "status": "in-transit", "eta": "2026-06-22", "departure": "2026-06-01", "days_at_sea": 4,  "total_days": 21, "freight_rate_usd": 3450, "rate_change": 210  }
+  ],
+  "freight_lanes": [
+    { "lane": "Monrovia → USEC",      "rate_per_mt": 68, "trend_pct": 4.2,  "mode": "FCL 20ft", "transit_days": "18–22" },
+    { "lane": "Douala → USEC",        "rate_per_mt": 74, "trend_pct": 1.8,  "mode": "FCL 20ft", "transit_days": "20–24" },
+    { "lane": "Monrovia → Rotterdam", "rate_per_mt": 52, "trend_pct": -1.1, "mode": "FCL 40ft", "transit_days": "14–17" },
+    { "lane": "Douala → Rotterdam",   "rate_per_mt": 49, "trend_pct": -2.3, "mode": "FCL 40ft", "transit_days": "12–15" }
+  ],
+  "ports": [
+    { "name": "Monrovia (FPL)",  "congestion": "Low",      "wait_days": "0–1", "bunker_usd_l": 0.68, "note": "Clear berths" },
+    { "name": "Douala",          "congestion": "Moderate", "wait_days": "3–5", "bunker_usd_l": 0.71, "note": "Bulk backlog" },
+    { "name": "Tema",            "congestion": "High",     "wait_days": "6–8", "bunker_usd_l": 0.74, "note": "Congestion advisory" },
+    { "name": "Baltimore (USEC)","congestion": "Low",      "wait_days": "0–2", "bunker_usd_l": 0.91, "note": "Normal ops" }
+  ],
+  "weather": [
+    { "region": "Oku Highlands, CMR", "condition": "Partly Cloudy", "temp_c": 18, "rain_mm": 12, "humidity_pct": 74, "alert": null },
+    { "region": "Bong County, LBR",   "condition": "Heavy Rain",    "temp_c": 27, "rain_mm": 48, "humidity_pct": 91, "alert": "Harvest delay risk" },
+    { "region": "Rivercess, LBR",     "condition": "Overcast",      "temp_c": 29, "rain_mm": 8,  "humidity_pct": 83, "alert": null },
+    { "region": "Nimba County, LBR",  "condition": "Clear",         "temp_c": 24, "rain_mm": 2,  "humidity_pct": 61, "alert": null }
+  ],
+  "rate_matches": [
+    { "carrier": "Evergreen Line", "route": "Monrovia → Newark",  "rate_per_20ft": 2720, "eta": "2026-06-24", "available": "Now",    "match_score": 94 },
+    { "carrier": "CMA CGM",        "route": "Monrovia → Newark",  "rate_per_20ft": 2840, "eta": "2026-06-28", "available": "Now",    "match_score": 88 },
+    { "carrier": "Hapag-Lloyd",    "route": "Douala → Baltimore", "rate_per_20ft": 2980, "eta": "2026-07-05", "available": "2026-06-09", "match_score": 85 },
+    { "carrier": "MSC",            "route": "Monrovia → Newark",  "rate_per_20ft": 3100, "eta": "2026-07-02", "available": "2026-06-12", "match_score": 79 },
+    { "carrier": "Maersk",         "route": "Douala → Rotterdam", "rate_per_20ft": 3220, "eta": "2026-07-08", "available": "Now",    "match_score": 76 }
+  ],
+  "transit_history": [
+    { "month": "2026-01", "monrovia_days": 21, "douala_days": 26, "tema_days": 22 },
+    { "month": "2026-02", "monrovia_days": 19, "douala_days": 24, "tema_days": 20 },
+    { "month": "2026-03", "monrovia_days": 22, "douala_days": 27, "tema_days": 23 },
+    { "month": "2026-04", "monrovia_days": 20, "douala_days": 25, "tema_days": 21 },
+    { "month": "2026-05", "monrovia_days": 18, "douala_days": 23, "tema_days": 19 },
+    { "month": "2026-06", "monrovia_days": 20, "douala_days": 25, "tema_days": 21 }
+  ],
+  "rate_history": [
+    { "month": "2026-01", "monrovia_usd": 2600, "douala_usd": 2900, "tema_usd": 3100 },
+    { "month": "2026-02", "monrovia_usd": 2550, "douala_usd": 2850, "tema_usd": 3000 },
+    { "month": "2026-03", "monrovia_usd": 2700, "douala_usd": 3000, "tema_usd": 3200 },
+    { "month": "2026-04", "monrovia_usd": 2750, "douala_usd": 3100, "tema_usd": 3300 },
+    { "month": "2026-05", "monrovia_usd": 2800, "douala_usd": 3050, "tema_usd": 3400 },
+    { "month": "2026-06", "monrovia_usd": 2840, "douala_usd": 3100, "tema_usd": 3450 }
+  ],
+  "nvocc_build": [
+    { "phase": "01", "label": "Entity & Brand",    "status": "complete"     },
+    { "phase": "02", "label": "FMC NVOCC Filing",  "status": "in_progress"  },
+    { "phase": "03", "label": "$75K Surety Bond",  "status": "pending"      },
+    { "phase": "04", "label": "Carrier Agreements","status": "pending"      }
+  ]
+}
