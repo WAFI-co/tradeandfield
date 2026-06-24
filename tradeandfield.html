@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trade & Field — by WAFI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --espresso:  #1A0F0A;
+      --parchment: #F2E8D9;
+      --amber:     #D47C0F;
+      --sage:      #5C7A5E;
+      --mid:       #3D2B1F;
+      --dust:      #C8B89A;
+      --deep:      #130B06;
+      --panel:     #1F120B;
+      --green:     #2ECC71;
+      --red:       #E74C3C;
+      --yellow:    #F1C40F;
+    }
+    html, body { background:var(--espresso); color:var(--parchment); font-family:'Space Grotesk',sans-serif; overflow-x:hidden; scroll-behavior:smooth; }
+    .page { display:none; }
+    .page.active { display:block; }
+
+    /* ── TICKER ── */
+    .ticker-wrap { width:100%; background:var(--mid); border-bottom:1px solid rgba(212,124,15,0.25); overflow:hidden; height:32px; display:flex; align-items:center; position:fixed; top:0; z-index:100; }
+    .ticker-label { flex-shrink:0; padding:0 14px; font-family:'Space Mono',monospace; font-size:9px; letter-spacing:0.18em; color:var(--amber); text-transform:uppercase; border-right:1px solid rgba(212,124,15,0.3); height:100%; display:flex; align-items:center; background:var(--mid); z-index:2; }
+    .ticker-track { display:flex; animation:ticker 40s linear infinite; white-space:nowrap; }
+    .ticker-item { display:inline-flex; align-items:center; gap:7px; padding:0 24px; font-family:'Space Mono',monospace; font-size:10px; color:var(--dust); }
+    .ticker-item .name { color:var(--parchment); font-weight:700; }
+    .ticker-item .up { color:var(--green); } .ticker-item .down { color:var(--red); }
+    .ticker-sep { color:rgba(212,124,15,0.3); }
+    @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+    /* ── NAV ── */
+    nav { position:fixed; top:32px; width:100%; z-index:90; display:flex; align-items:center; justify-content:space-between; padding:0 40px; height:60px; background:rgba(26,15,10,0.97); backdrop-filter:blur(14px); border-bottom:1px solid rgba(242,232,217,0.07); }
+    .nav-logo { font-family:'Playfair Display',serif; font-size:18px; font-style:italic; color:var(--parchment); cursor:pointer; }
+    .nav-logo em { color:var(--amber); }
+    .nav-logo small { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:0.2em; text-transform:uppercase; color:var(--sage); margin-left:8px; font-style:normal; }
+    .nav-links { display:flex; gap:4px; list-style:none; }
+    .nav-btn { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--dust); background:transparent; border:1px solid transparent; padding:6px 14px; cursor:pointer; transition:all 0.15s; }
+    .nav-btn:hover { color:var(--parchment); border-color:rgba(242,232,217,0.15); }
+    .nav-btn.trade { border-color:rgba(212,124,15,0.4); color:var(--amber); }
+    .nav-btn.trade:hover,.nav-btn.trade.active { background:var(--amber); color:var(--espresso); border-color:var(--amber); }
+    .nav-btn.field { border-color:rgba(92,122,94,0.4); color:var(--sage); }
+    .nav-btn.field:hover,.nav-btn.field.active { background:var(--sage); color:var(--parchment); border-color:var(--sage); }
+    .nav-btn.home.active { color:var(--parchment); border-color:rgba(242,232,217,0.2); }
+    .nav-cta { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--espresso); background:var(--amber); padding:7px 16px; border:none; cursor:pointer; text-decoration:none; }
+    .nav-cta:hover { background:#e8920f; }
+
+    /* ═══════════ SHARED COMPONENTS ═══════════ */
+    .mono { font-family:'Space Mono',monospace; }
+    .serif { font-family:'Playfair Display',serif; }
+    .up { color:var(--green); } .down { color:var(--red); } .neutral { color:var(--dust); }
+    .bar-head { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:rgba(19,11,6,0.6); border-bottom:1px solid rgba(242,232,217,0.06); border-top:1px solid rgba(242,232,217,0.05); }
+    .bar-label { font-family:'Space Mono',monospace; font-size:8.5px; letter-spacing:0.24em; text-transform:uppercase; color:var(--amber); }
+    .bar-time { font-family:'Space Mono',monospace; font-size:8.5px; color:rgba(200,184,154,0.35); }
+    .pulse { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2s ease-in-out infinite; display:inline-block; margin-right:5px; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.65)} }
+
+    /* ═══════════════════════════════════════════
+       HOME PAGE
+    ═══════════════════════════════════════════ */
+    .hero { min-height:100vh; padding-top:92px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:var(--deep); position:relative; overflow:hidden; }
+    .hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 55% at 50% 10%, rgba(212,124,15,0.07) 0%, transparent 65%); pointer-events:none; }
+    .hero-inner { max-width:760px; padding:80px 32px 60px; position:relative; z-index:2; }
+    .eyebrow { font-family:'Space Mono',monospace; font-size:9.5px; letter-spacing:0.28em; text-transform:uppercase; color:var(--amber); margin-bottom:30px; display:flex; align-items:center; justify-content:center; gap:14px; }
+    .eyebrow::before,.eyebrow::after { content:''; display:block; width:30px; height:1px; background:var(--amber); }
+    .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(70px,10vw,118px); font-weight:400; line-height:0.88; letter-spacing:-0.025em; color:var(--parchment); }
+    .hero h1 em { font-style:italic; color:var(--amber); }
+    .byline { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.24em; text-transform:uppercase; color:var(--sage); margin-top:20px; margin-bottom:44px; }
+    .hero-rule { width:1px; height:50px; background:rgba(212,124,15,0.3); margin:0 auto 40px; }
+    .hero-desc { font-family:'Playfair Display',serif; font-size:18px; font-style:italic; line-height:1.78; color:var(--dust); margin-bottom:48px; }
+    .hero-desc strong { font-style:normal; color:var(--parchment); font-weight:500; }
+    .origin-tags { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:48px; }
+    .origin-tag { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border:1px solid rgba(92,122,94,0.4); color:var(--sage); }
+    .hero-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .btn-amber { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--espresso); background:var(--amber); padding:13px 26px; border:none; cursor:pointer; transition:background 0.2s; }
+    .btn-amber:hover { background:#e8920f; }
+    .btn-sage { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--parchment); background:transparent; padding:12px 26px; border:1px solid rgba(92,122,94,0.45); cursor:pointer; transition:all 0.2s; }
+    .btn-sage:hover { background:var(--sage); border-color:var(--sage); }
+    .scroll-hint { margin-top:52px; display:flex; flex-direction:column; align-items:center; gap:7px; animation:bob 2.5s ease-in-out infinite; }
+    .scroll-hint span { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:0.2em; text-transform:uppercase; color:rgba(200,184,154,0.3); }
+    @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
+    .sep-line { height:1px; background:linear-gradient(to right,transparent,rgba(212,124,15,0.3),transparent); }
+
+    /* Home market strip */
+    .home-market { background:var(--espresso); }
+    .home-market-head { display:flex; align-items:center; justify-content:space-between; padding:24px 40px 18px; border-bottom:1px solid rgba(242,232,217,0.06); }
+    .hm-title { display:flex; align-items:baseline; gap:14px; }
+    .hm-tag { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:0.26em; text-transform:uppercase; color:var(--amber); }
+    .hm-h { font-family:'Playfair Display',serif; font-size:28px; font-weight:400; font-style:italic; color:var(--parchment); }
+    .more-btn { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--amber); background:none; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+    .more-btn::after { content:'→'; } .more-btn:hover { gap:12px; }
+    .home-prices { padding:0 40px; }
+    .home-prices table { width:100%; border-collapse:collapse; }
+    .home-prices thead tr { border-bottom:1px solid rgba(242,232,217,0.06); }
+    .home-prices th { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:0.18em; text-transform:uppercase; color:rgba(200,184,154,0.35); padding:8px 12px; text-align:left; font-weight:400; }
+    .home-prices th:not(:first-child) { text-align:right; }
+    .home-prices tbody tr { border-bottom:1px solid rgba(242,232,217,0.04); transition:background 0.12s; }
+    .home-prices tbody tr:hover { background:rgba(61,43,31,0.4); }
+    .home-prices td { padding:13px 12px; font-family:'Space Mono',monospace; font-size:10px; }
+    .home-prices td:not(:first-child) { text-align:right; }
+    .td-n { color:var(--parchment); font-weight:700; font-size:11px; }
+    .td-s { color:rgba(200,184,154,0.35); font-size:8px; display:block; margin-top:1px; }
+    .td-p { color:var(--parchment); font-size:14px; font-weight:700; }
+    .spark { display:inline-flex; align-items:flex-end; gap:1.5px; height:16px; vertical-align:middle; }
+    .sb { width:3.5px; border-radius:1px; }
+    .sb.u { background:var(--green); } .sb.d { background:var(--red); }
+    .home-2col { display:grid; grid-template-columns:1fr 280px; padding:20px 40px 48px; gap:32px; }
+    .home-chart-area {}
+    .home-chart-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+    .hc-name { font-family:'Playfair Display',serif; font-size:18px; font-style:italic; color:var(--parchment); }
+    .hc-price { font-family:'Space Mono',monospace; font-size:26px; font-weight:700; color:var(--parchment); }
+    .hc-chg { font-family:'Space Mono',monospace; font-size:11px; margin-top:2px; }
+    .chart-tabs { display:flex; gap:2px; margin-bottom:12px; }
+    .ct { font-family:'Space Mono',monospace; font-size:8.5px; letter-spacing:0.12em; text-transform:uppercase; padding:4px 10px; background:transparent; border:1px solid rgba(242,232,217,0.1); color:rgba(200,184,154,0.45); cursor:pointer; transition:all 0.12s; }
+    .ct.active,.ct:hover { background:var(--amber); border-color:var(--amber); color:var(--espresso); }
+    .canvas-wrap { background:rgba(19,11,6,0.5); border:1px solid rgba(242,232,217,0.05); padding:12px 12px 3px; }
+    .caxis { display:flex; justify-content:space-between; padding:4px 2px 0; }
+    .caxis span { font-family:'Space Mono',monospace; font-size:7.5px; color:rgba(200,184,154,0.25); }
+    .home-oi { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin-top:12px; }
+    .oi-c { background:rgba(61,43,31,0.35); border:1px solid rgba(242,232,217,0.05); padding:14px 16px; }
+    .oi-l { font-family:'Space Mono',monospace; font-size:7.5px; letter-spacing:0.18em; text-transform:uppercase; color:rgba(200,184,154,0.35); margin-bottom:4px; }
+    .oi-v { font-family:'Space Mono',monospace; font-size:17px; font-weight:700; color:var(--parchment); }
+    .oi-ch { font-family:'Space Mono',monospace; font-size:8.5px; margin-top:3px; }
+    .home-side {}
+    .side-block { margin-bottom:24px; }
+    .side-lbl { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:0.22em; text-transform:uppercase; color:var(--amber); margin-bottom:8px; padding-bottom:7px; border-bottom:1px solid rgba(212,124,15,0.18); }
+    .side-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid rgba(242,232,217,0.04); }
+    .side-key { font-family:'Space Mono',monospace; font-size:9px; color:var(--dust); }
+    .side-key small { display:block; font-size:7.5px; color:rgba(200,184,154,0.35); text-transform:uppercase; letter-spacing:0.05em; margin-top:1px; }
+    .side-val { font-family:'Space Mono',monospace; font-size:9.5px; color:var(--parchment); text-align:right; }
+    .side-val small { display:block; font-size:7.5px; color:rgba(200,184,154,0.35); text-transform:uppercase; }
+
+    /* Home field */
+    .home-field { background:var(--deep); padding-bottom:64px; }
+    .hf-head { display:flex; align-items:center; justify-content:space-between; padding:36px 40px 26px; border-bottom:1px solid rgba(242,232,217,0.06); margin-bottom:30px; }
+    .art-wrap { padding:0 40px; }
+    .af { display:grid; grid-template-columns:1.3fr 1fr; border:1px solid rgba(242,232,217,0.07); margin-bottom:3px; text-decoration:none; color:inherit; transition:border-color 0.2s; }
+    .af:hover { border-color:rgba(212,124,15,0.28); }
+    .af-img { overflow:hidden; }
+    .af-img img { width:100%; height:100%; min-height:280px; object-fit:cover; display:block; filter:brightness(0.78); transition:transform 0.5s; }
+    .af:hover .af-img img { transform:scale(1.03); }
+    .af-body { padding:40px 36px; background:rgba(61,43,31,0.3); display:flex; flex-direction:column; justify-content:center; }
+    .art-tag { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:0.2em; text-transform:uppercase; color:var(--sage); margin-bottom:12px; }
+    .af-title { font-family:'Playfair Display',serif; font-size:24px; font-weight:500; line-height:1.22; color:var(--parchment); margin-bottom:14px; }
+    .af-ex { font-size:13.5px; line-height:1.72; color:var(--dust); margin-bottom:20px; }
+    .af-date { font-family:'Space Mono',monospace; font-size:8.5px; letter-spacing:0.1em; color:rgba(200,184,154,0.35); text-transform:uppercase; }
+    .art-read { font-family:'Space Mono',monospace; font-size:8.5px; letter-spacing:0.16em; text-transform:uppercase; color:var(--amber); margin-top:18px; display:inline-flex; align-items:center; gap:7px; transition:gap 0.2s; }
+    .af:hover .art-read { gap:13px; } .art-read::after { content:'→'; }
+    .art-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; margin-top:3px; }
+    .ac { background:rgba(61,43,31,0.2); border:1px solid rgba(242,232,217,0.05); text-decoration:none; color:inherit; display:flex; flex-direction:column; transition:background 0.2s,border-color 0.2s; }
+    .ac:hover { background:rgba(61,43,31,0.5); border-color:rgba(212,124,15,0.18); }
+    .ac-img { aspect-ratio:16/9; overflow:hidden; }
+    .ac-img img { width:100%; height:100%; object-fit:cover; display:block; filter:brightness(0.75); transition:transform 0.4s; }
+    .ac:hover .ac-img img { transform:scale(1.04); }
+    .ac-body { padding:20px 20px 24px; flex:1; display:flex; flex-direction:column; }
+    .ac-title { font-family:'Playfair Display',serif; font-size:16px; font-weight:500; line-height:1.3; color:var(--parchment); margin-bottom:8px; flex:1; }
+    .ac-ex { font-size:12.5px; line-height:1.62; color:var(--dust); margin-bottom:12px; opacity:0.78; }
+    .ac-meta { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:0.1em; color:rgba(200,184,154,0.35); text-transform:uppercase; margin-top:auto; }
+
+    /* ═══════════════════════════════════════════
+       TRADE DASHBOARD PAGE
+    ═══════════════════════════════════════════ */
+    .trade-page { background:var(--espresso); min-height:100vh; }
+    .trade-header { background:var(--deep); border-bottom:1px solid rgba(212,124,15,0.2); padding:32px 40px 24px; display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-top:92px; }
+    .th-left {}
+    .th-eyebrow { font-family:'Space Mono',monospace; font-size:8.5px; letter-spacing:0.26em; text-transform:uppercase; color:var(--amber); margin-bottom:6px; }
+    .th-title { font-family:'Playfair Display',serif; font-size:44px; font-weight:400; font-style:italic; color:var(--parchment); line-height:1; }
+    .th-sub { font-family:'Space Mono',monospace; font-size:8.5px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(200,184,154,0.38); margin-top:7px; }
+    .th-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+    .live-badge { display:flex; align-items:center; gap:6px; font-family:'Space Mono',monospace; font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--green); }
+    .th-stamp { font-family:'Space Mono',monospace; font-size:8.5px; color:rgba(200,184,154,0.35); }
+
+    /* SUMMARY STRIP */
+    .summary-strip { display:grid; grid-template-columns:repeat(6,1fr); border-bottom:1px solid rgba(242,232,217,0.06); }
+    .ss-cell { padding:16px 18px; border-right:1px solid rgba(242,232,217,0.05); }
+    .ss-cell:last-child { border-right:none; }
+    .ss-label { font-family:'Space Mono',monospace; font-size:7.5px; letter-spacing:0.2em; text-transform:uppercase; color:rgba(200,184,154,0.38); margin-bottom:5px; }
+    .ss-val { font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--parchment); line-height:1; }
+    .ss-chg { font-family:'Space Mono',monospace; font-size:9px; margin-top:4px; }
+    .ss-sub { font-family:'Space Mono',monospace; font-size:8px; color:rgba(200,184,154,0.35); margin-top:2px; }
+
+    /* MAIN DASHBOARD GRID */
+    .dash-grid { display:grid; grid-template-columns:1fr 1fr 320px; gap:0; }
+    .dash-main { border-right:1px solid rgba(242,232,217,0.06); }
+    .dash-right { border-right:1px solid rgba(242,232,217,0.06); }
+    .dash-sidebar { background:var(--panel); }
+
+    /* PRICE TABLE */
+    .ptable { width:100%; border-collapse:collapse; }
+    .ptable thead tr { border-bottom:1px solid rgba(242,232,217,0.07); }
+    .ptable th { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:0.16em; text-transform:uppercase; color:rgba(200,184,154,0.35); padding:9px 14px; text-align:left; font-weight:400; }
+    .ptable th:not(:first-child) { text-align:right; }
+    .ptable tbody tr { border-bottom:1px solid rgba(242,232,217,0.04); transition:background 0.12s; cursor:pointer; }
+    .ptable tbody tr:hover { background:rgba(61,43,31,0.45); }
+    .ptable tbody tr.selected { background:rgba(212,124,15,0.08); border-left:2px solid var(--amber); }
+    .ptable td { padding:14px 14px; font-family:'Space Mono',monospace; font-size:10px; }
+    .ptable td:not(:first-child) { text-align:right; }
+    .pn { color:var(--parchment); font-weight:700; font-size:11.5px; }
+    .ps { color:rgba(200,184,154,0.35); font-size:8px; display:block; margin-top:1px; }
+    .pp { color:var(--parchment); font-size:14px; font-weight:700; }
+    .pvol { color:rgba(200,184,154,0.45); }
+
+    /* CHART */
+    .chart-section { padding:18px 18px 12px; }
+    .cs-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+    .cs-name { font-family:'Playfair Display',serif; font-size:19px; font-style:italic; color:var(--parchment); }
+    .cs-meta { font-family:'Space Mono',monospace; font-size:8px; color:rgba(200,184,154,0.35); margin-top:3px; text-transform:uppercase; letter-spacing:0.1em; }
+    .cs-price { font-family:'Space Mono',monospace; font-size:26px; font-weight:700; color:var(--parchment); text-align:right; }
+    .cs-chg { font-family:'Space Mono',monospace; font-size:11px; margin-top:2px; text-align:right; }
+
+    /* FORWARD CURVE TABLE */
+    .curve-table { width:100%; border-collapse:collapse; }
+    .curve-table thead tr { border-bottom:1px solid rgba(242,232,217,0.06); }
+    .curve-table th { font-family:'Space Mono',monospace; font-size:7.5px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(200,184,154,0.32); padding:8px 14px; font-weight:400; }
+    .curve-table th:not(:first-child) { text-align:right; }
+    .curve-table tbody tr { border-bottom:1px solid rgba(242,232,217,0.04); transition:background 0.12s; }
+    .curve-table tbody tr:hover { background:rgba(61,43,31,0.35); }
+    .curve-table td { padding:11px 14px; font-family:'Space Mono',monospace; font-size:10px; }
+    .curve-table td:not(:first-child) { text-align:right; }
+    .curve-bar-cell { padding:11px 14px; }
+    .curve-bar { height:6px; background:var(--amber); border-radius:2px; opacity:0.55; transition:opacity 0.2s; }
+    .curve-table tr:hover .curve-bar { opacity:1; }
+    .front-badge { font-size:7px; color:var(--amber); letter-spacing:0.1em; margin-left:5px; background:rgba(212,124,15,0.12); padding:1px 5px; }
+
+    /* COT / POSITIONING */
+    .cot-grid { display:grid; grid-template-columns:1fr 1fr; gap:2px; padding:12px; }
+    .cot-card { background:rgba(61,43,31,0.3); border:1px solid rgba(242,232,217,0.05); padding:14px 16px; }
+    .cot-label { font-family:'Space Mono',monospace; font-size:7.5px; letter-spacing:0.18em; text-transform:uppercase; color:rgba(200,184,154,0.35); margin-bottom:4px; }
+    .cot-val { font-family:'Space Mono',monospace; font-size:17px; font-weight:700; }
+    .cot-sub { font-family:'Space Mono',monospace; font-size:8px; color:rgba(200,184,154,0.35); margin-top:3px; }
+    .net-bar-wrap { padding:12px 14px 16px; }
+    .net-bar-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:0.16em; text-transform:uppercase; color:rgba(200,184,154,0.35); margin-bottom:8px; }
+    .net-bar { height:8px; background:rgba(242,232,217,0.06); border-radius:4px; position:relative; margin-bottom:5px; }
+    .net-bar-fill { height:100%; border-radius:4px; position:absolute; }
+    .net-bar-mid { position:absolute; left:50%; top:-3px; bottom:-3px; width:1px; background:rgba(242,232,217,0.2); }
+    .net-bar-note { font-family:'Space Mono',monospace; font-size:8px; color:rgba(200,184,154,0.35); display:flex; justify-content:space-between; }
+
+    /* WEATHER */
+    .wx-grid { display:grid; grid-template-columns:1fr 1fr; gap:2px; padding:10px; }
+    .wx-card { background:rgba(61,43,31,0.3); border:1px solid rgba(242,232,217,0.05); padding:14px 14px; position:relative; overflow:hidden; }
+    .wx-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+    .wx-card.cocoa::before { background:var(--amber); }
+    .wx-card.coffee::before { background:var(--sage); }
+    .wx-country { font-family:'Space Mono',monospace; font-size:10px; font-weight:700; color:var(--parchment); }
+    .wx-region { font-family:'Space Mono',monospace; font-size:7.5px; color:rgba(200,184,154,0.38); text-transform:uppercase; letter-spacing:0.08em; margin-top:1px; margin-bottom:10px; }
+    .wx-commodity { font-size:7.5px; color:var(--amber); font-family:'Space Mono',monospace; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:8px; }
+    .wx-commodity.coffee { color:var(--sage); }
+    .wx-temp { font-family:'Space Mono',monospace; font-size:22px; font-weight:700; color:var(--parchment); line-height:1; }
+    .wx-condition { font-family:'Space Mono',monospace; font-size:8.5px; color:var(--dust); margin-top:5px; }
+    .wx-detail { font-family:'Space Mono',monospace; font-size:7.5px; color:rgba(200,184,154,0.38); margin-top:3px; }
+    .wx-alert { font-family:'Space Mono',monospace; font-size:7.5px; color:var(--red); margin-top:5px; letter-spacing:0.08em; text-transform:uppercase; }
+    .wx-good { font-family:'Space Mono',monospace; font-size:7.5px; color:var(--green); margin-top:5px; letter-spacing:0.08em; text-transform:uppercase; }
+
+    /* SIDEBAR */
+    .sb-section { border-bottom:1px solid rgba(242,232,217,0.05); }
+    .sb-head { padding:10px 16px; background:rgba(19,11,6,0.5); border-bottom:1px solid rgba(242,232,217,0.05); display:flex; align-items:center; justify-content:space-between; }
+    .sb-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:0.22em; text-transform:uppercase; color:var(--amber); }
+    .sb-sub { font-family:'Space Mono',monospace; font-size:7.5px; color:rgba(200,184,154,0.3); }
+    .fx-row { display:flex; align-items:center; justify-content:space-between; padding:9px 16px; border-bottom:1px solid rgba(242,232,217,0.04); transition:background 0.12s; }
+    .fx-row:hover { background:rgba(61,43,31,0.3); }
+    .fx-pair { font-family:'Space Mono',monospace; font-size:10px; font-weight:700; color:var(--parchment); }
+    .fx-sub { font-family:'Space Mono',monospace; font-size:7.5px; color:rgba(200,184,154,0.35); }
+    .fx-right { text-align:right; }
+    .fx-rate { font-family:'Space Mono',monospace; font-size:11px; color:var(--parchment); font-weight:700; }
+    .fx-chg { font-family:'Space Mono',monospace; font-size:8.5px; }
+    .spread-row { display:flex; align-items:center; justify-content:space-between; padding:9px 16px; border-bottom:1px solid rgba(242,232,217,0.04); }
+    .spread-name { font-family:'Space Mono',monospace; font-size:8.5px; color:var(--dust); }
+    .spread-val { font-family:'Space Mono',monospace; font-size:11px; font-weight:700; }
+    .news-item { padding:12px 16px; border-bottom:1px solid rgba(242,232,217,0.04); }
+    .news-date { font-family:'Space Mono',monospace; font-size:7.5px; color:rgba(200,184,154,0.35); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:4px; }
+    .news-head { font-size:12px; line-height:1.4; color:var(--dust); }
+    .news-tag { display:inline-block; font-family:'Space Mono',monospace; font-size:7px; letter-spacing:0.1em; text-transform:uppercase; padding:2px 6px; margin-top:5px; border-radius:1px; }
+    .news-tag.bearish { background:rgba(231,76,60,0.15); color:var(--red); }
+    .news-tag.bullish { background:rgba(46,204,113,0.15); color:var(--green); }
+    .news-tag.neutral { background:rgba(200,184,154,0.1); color:var(--dust); }
+    .season-grid { display:grid; grid-template-columns:1fr 1fr; gap:2px; padding:10px; }
+    .season-card { background:rgba(61,43,31,0.25); border:1px solid rgba(242,232,217,0.05); padding:12px 12px; }
+    .season-country { font-family:'Space Mono',monospace; font-size:9px; font-weight:700; color:var(--parchment); }
+    .season-label { font-family:'Space Mono',monospace; font-size:7.5px; color:rgba(200,184,154,0.35); text-transform:uppercase; letter-spacing:0.08em; margin-top:2px; }
+    .season-phase { font-family:'Space Mono',monospace; font-size:8.5px; color:var(--amber); margin-top:6px; }
+    .season-pct { height:4px; background:rgba(242,232,217,0.07); border-radius:2px; margin-top:5px; }
+    .season-pct-fill { height:100%; border-radius:2px; background:var(--amber); }
+    .season-pct-fill.sage { background:var(--sage); }
+    .storey-row { display:flex; align-items:center; justify-content:space-between; padding:9px 16px; border-bottom:1px solid rgba(242,232,217,0.04); }
+    .storey-label { font-family:'Space Mono',monospace; font-size:8.5px; color:var(--dust); }
+    .storey-val { font-family:'Space Mono',monospace; font-size:10px; color:var(--parchment); font-weight:700; }
+
+    /* ═══════════════════════════════════════════
+       FIELD PAGE
+    ═══════════════════════════════════════════ */
+    .field-page { background:var(--espresso); }
+    .field-hero { padding-top:92px; background:var(--deep); text-align:center; position:relative; overflow:hidden; }
+    .field-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(212,124,15,0.06) 0%, transparent 70%); pointer-events:none; }
+    .fh-inner { max-width:700px; margin:0 auto; padding:68px 32px 58px; position:relative; z-index:2; }
+    .field-hero h2 { font-family:'Playfair Display',serif; font-size:clamp(62px,9vw,106px); font-weight:400; line-height:0.9; letter-spacing:-0.02em; color:var(--parchment); }
+    .field-hero h2 em { font-style:italic; color:var(--amber); display:block; }
+    .fh-rule { width:1px; height:44px; background:rgba(212,124,15,0.3); margin:18px auto 36px; }
+    .fh-desc { font-family:'Playfair Display',serif; font-size:17.5px; font-style:italic; line-height:1.75; color:var(--dust); }
+    .fh-desc strong { font-style:normal; color:var(--parchment); }
+    .fh-foot { height:1px; background:linear-gradient(to right,transparent,var(--amber),transparent); margin-top:52px; }
+    .field-art-wrap { background:var(--espresso); padding:52px 40px 80px; }
+    .fa-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:36px; border-bottom:1px solid rgba(242,232,217,0.06); padding-bottom:16px; }
+    .fa-title { font-family:'Playfair Display',serif; font-size:26px; font-weight:400; font-style:italic; color:var(--parchment); }
+    .fa-count { font-family:'Space Mono',monospace; font-size:8.5px; letter-spacing:0.16em; text-transform:uppercase; color:rgba(200,184,154,0.35); }
+
+    /* ── FOOTER ── */
+    footer { background:#0D0703; border-top:1px solid rgba(242,232,217,0.06); padding:36px 40px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px; }
+    .fb { font-family:'Playfair Display',serif; font-size:20px; font-style:italic; color:var(--parchment); cursor:pointer; }
+    .fb span { font-family:'Space Mono',monospace; font-size:8.5px; letter-spacing:0.2em; text-transform:uppercase; color:var(--amber); display:block; margin-top:3px; }
+    .fl { display:flex; gap:24px; }
+    .fl button,.fl a { font-family:'Space Mono',monospace; font-size:8.5px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(200,184,154,0.35); background:none; border:none; cursor:pointer; text-decoration:none; transition:color 0.2s; }
+    .fl button:hover,.fl a:hover { color:var(--dust); }
+    .fc { font-family:'Space Mono',monospace; font-size:8.5px; color:rgba(200,184,154,0.2); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:1200px){
+      .dash-grid{grid-template-columns:1fr 320px}
+      .dash-right{display:none}
+      .summary-strip{grid-template-columns:repeat(3,1fr)}
+    }
+    @media(max-width:900px){
+      .dash-grid{grid-template-columns:1fr}
+      .dash-sidebar{border-top:1px solid rgba(242,232,217,0.06)}
+      .summary-strip{grid-template-columns:repeat(2,1fr)}
+      .wx-grid{grid-template-columns:1fr 1fr}
+      .home-2col{grid-template-columns:1fr;padding:16px 20px 36px;gap:20px}
+      .home-market-head,.home-prices,.hf-head,.art-wrap,.field-art-wrap{padding-left:20px;padding-right:20px}
+      .art-grid{grid-template-columns:1fr 1fr}
+      .af{grid-template-columns:1fr}
+      .af-img img{min-height:200px}
+      .trade-header{padding:24px 20px 20px}
+      footer{padding:28px 20px}
+    }
+    @media(max-width:640px){
+      nav{padding:0 16px}
+      .nav-btn{padding:5px 9px;font-size:8.5px}
+      .art-grid{grid-template-columns:1fr}
+      .summary-strip{grid-template-columns:repeat(2,1fr)}
+      .wx-grid{grid-template-columns:1fr}
+      .cot-grid{grid-template-columns:1fr}
+      .season-grid{grid-template-columns:1fr}
+    }
+    @media(prefers-reduced-motion:reduce){.ticker-track{animation:none}.pulse{animation:none}.scroll-hint{animation:none}}
+  </style>
+</head>
+<body>
+
+<!-- ── TICKER ── -->
+<div class="ticker-wrap">
+  <div class="ticker-label">Markets</div>
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="name">CC1</span> <span class="price">9,842</span> <span class="up">▲+1.24%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">KC1</span> <span class="price">3.187</span> <span class="up">▲+0.83%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">RC1</span> <span class="price">5,312</span> <span class="down">▼−0.18%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">CC Sep'26</span> <span class="price">9,910</span> <span class="down">▼−0.41%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">KC Sep'26</span> <span class="price">3.205</span> <span class="up">▲+1.07%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">USD/GHS</span> <span class="price">15.42</span> <span class="down">▼−0.06%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">USD/XOF</span> <span class="price">616.4</span> <span class="up">▲+0.12%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">USD/BRL</span> <span class="price">5.14</span> <span class="down">▼−0.09%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">Brent</span> <span class="price">82.14</span> <span class="up">▲+0.54%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">DXY</span> <span class="price">104.2</span> <span class="down">▼−0.22%</span></span><span class="ticker-sep"> | </span>
+    <!-- mirror -->
+    <span class="ticker-item"><span class="name">CC1</span> <span class="price">9,842</span> <span class="up">▲+1.24%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">KC1</span> <span class="price">3.187</span> <span class="up">▲+0.83%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">RC1</span> <span class="price">5,312</span> <span class="down">▼−0.18%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">CC Sep'26</span> <span class="price">9,910</span> <span class="down">▼−0.41%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">KC Sep'26</span> <span class="price">3.205</span> <span class="up">▲+1.07%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">USD/GHS</span> <span class="price">15.42</span> <span class="down">▼−0.06%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">USD/XOF</span> <span class="price">616.4</span> <span class="up">▲+0.12%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">USD/BRL</span> <span class="price">5.14</span> <span class="down">▼−0.09%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">Brent</span> <span class="price">82.14</span> <span class="up">▲+0.54%</span></span><span class="ticker-sep"> | </span>
+    <span class="ticker-item"><span class="name">DXY</span> <span class="price">104.2</span> <span class="down">▼−0.22%</span></span><span class="ticker-sep"> | </span>
+  </div>
+</div>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">Trade <em>&amp;</em> Field <small>by WAFI</small></div>
+  <ul class="nav-links">
+    <li><button class="nav-btn home" onclick="showPage('home')">Home</button></li>
+    <li><button class="nav-btn trade" onclick="showPage('trade')">Trade</button></li>
+    <li><button class="nav-btn field" onclick="showPage('field')">Field</button></li>
+  </ul>
+  <a href="https://wafi.co" target="_blank" class="nav-cta">Visit WAFI</a>
+</nav>
+
+<!-- ════════════════════════════════════════
+     HOME
+════════════════════════════════════════ -->
+<div id="page-home" class="page active">
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">WAFI Dispatch</div>
+      <h1>Trade<br><em>&amp; Field</em></h1>
+      <div class="byline">By WAFI</div>
+      <div class="hero-rule"></div>
+      <p class="hero-desc">WAFI's dispatch from the intersection of <strong>agriculture and trade.</strong> Part field report, part market briefing — delivering firsthand updates on growing conditions, agronomy, and production alongside <strong>sharp perspectives</strong> on the economic forces moving global commodities. Written from both origin in <strong>Africa</strong> and our outpost in <strong>New York,</strong> Trade &amp; Field offers a clear, practical look at how real-world conditions shape supply, pricing, and opportunity across the markets we operate in.</p>
+      <div class="origin-tags">
+        <span class="origin-tag">📍 Origin · Africa</span>
+        <span class="origin-tag">📍 Outpost · New York</span>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-amber" onclick="showPage('trade')">The Trade →</button>
+        <button class="btn-sage" onclick="showPage('field')">The Field →</button>
+      </div>
+      <div class="scroll-hint"><span>Scroll</span><svg width="13" height="19" viewBox="0 0 13 19" fill="none"><rect x="1" y="1" width="11" height="17" rx="5.5" stroke="#C8B89A" stroke-width="1.2"/><circle cx="6.5" cy="5.5" r="1.8" fill="#C8B89A"/></svg></div>
+    </div>
+  </section>
+  <div class="sep-line"></div>
+  <!-- HOME MARKET SNAPSHOT -->
+  <section class="home-market">
+    <div class="home-market-head">
+      <div class="hm-title"><span class="hm-tag">The Trade</span><span class="hm-h">Markets</span></div>
+      <div style="display:flex;align-items:center;gap:18px;"><span class="live-badge"><span class="pulse"></span>Live · ICE NY</span><button class="more-btn" onclick="showPage('trade')">Full Dashboard</button></div>
+    </div>
+    <div class="home-prices">
+      <table>
+        <thead><tr><th>Contract</th><th>Price</th><th>Chg</th><th>%</th><th>High</th><th>Low</th><th>Vol</th><th>5D</th></tr></thead>
+        <tbody>
+          <tr><td><span class="td-n">Cocoa</span><span class="td-s">ICE · CC1 · USD/MT</span></td><td class="td-p">9,842</td><td class="up">+120</td><td class="up">+1.24%</td><td class="neutral">9,901</td><td class="neutral">9,714</td><td class="pvol">18,402</td><td><span class="spark"><span class="sb u" style="height:40%"></span><span class="sb u" style="height:58%"></span><span class="sb u" style="height:72%"></span><span class="sb u" style="height:88%"></span><span class="sb u" style="height:100%"></span></span></td></tr>
+          <tr><td><span class="td-n">Arabica Coffee</span><span class="td-s">ICE · KC1 · USD/lb</span></td><td class="td-p">3.187</td><td class="up">+0.026</td><td class="up">+0.83%</td><td class="neutral">3.210</td><td class="neutral">3.155</td><td class="pvol">24,118</td><td><span class="spark"><span class="sb u" style="height:52%"></span><span class="sb u" style="height:66%"></span><span class="sb u" style="height:78%"></span><span class="sb u" style="height:91%"></span><span class="sb u" style="height:100%"></span></span></td></tr>
+          <tr><td><span class="td-n">Robusta Coffee</span><span class="td-s">LIFFE · RC1 · USD/MT</span></td><td class="td-p">5,312</td><td class="down">−10</td><td class="down">−0.18%</td><td class="neutral">5,388</td><td class="neutral">5,290</td><td class="pvol">9,841</td><td><span class="spark"><span class="sb d" style="height:100%"></span><span class="sb d" style="height:84%"></span><span class="sb d" style="height:72%"></span><span class="sb d" style="height:64%"></span><span class="sb d" style="height:57%"></span></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="home-2col">
+      <div class="home-chart-area">
+        <div class="home-chart-head">
+          <div><div class="hc-name">Cocoa · ICE CC1</div><div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(200,184,154,0.35);margin-top:3px;text-transform:uppercase;letter-spacing:0.1em;">USD/MT · Front Month</div></div>
+          <div><div class="hc-price">9,842</div><div class="hc-chg up">▲ +120 · +1.24%</div></div>
+        </div>
+        <div class="chart-tabs"><button class="ct">1D</button><button class="ct active">1W</button><button class="ct">1M</button><button class="ct">3M</button><button class="ct">1Y</button></div>
+        <div class="canvas-wrap"><canvas id="homeChart" height="150"></canvas><div class="caxis"><span>Jun 17</span><span>Jun 18</span><span>Jun 19</span><span>Jun 20</span><span>Jun 21</span><span>Jun 23</span></div></div>
+        <div class="home-oi">
+          <div class="oi-c"><div class="oi-l">Cocoa OI</div><div class="oi-v">214,830</div><div class="oi-ch up">▲ +2,140</div></div>
+          <div class="oi-c"><div class="oi-l">Arabica OI</div><div class="oi-v">188,412</div><div class="oi-ch down">▼ −880</div></div>
+          <div class="oi-c"><div class="oi-l">Net Spec · Cocoa</div><div class="oi-v" style="color:var(--amber)">Long</div><div class="oi-ch neutral">+34,100 net</div></div>
+        </div>
+      </div>
+      <div class="home-side">
+        <div class="side-block">
+          <div class="side-lbl">Origin Weather</div>
+          <div class="side-row"><div class="side-key">Côte d'Ivoire<small>Cocoa · Main Crop</small></div><div class="side-val">31°C<small>Partly Dry</small></div></div>
+          <div class="side-row"><div class="side-key">Ghana<small>Cocoa · Light Crop</small></div><div class="side-val">28°C<small>Light Rain</small></div></div>
+          <div class="side-row"><div class="side-key">Brazil Cerrado<small>Arabica · Harvest</small></div><div class="side-val">22°C<small>Dry Season</small></div></div>
+          <div class="side-row"><div class="side-key">Colombia<small>Arabica · Mid-Crop</small></div><div class="side-val">18°C<small>Overcast</small></div></div>
+        </div>
+        <div class="side-block">
+          <div class="side-lbl">Origin FX</div>
+          <div class="side-row"><div class="side-key">USD/GHS</div><div class="side-val">15.42 <span class="down" style="font-size:8px">▼</span></div></div>
+          <div class="side-row"><div class="side-key">USD/XOF</div><div class="side-val">616.4 <span class="up" style="font-size:8px">▲</span></div></div>
+          <div class="side-row"><div class="side-key">USD/BRL</div><div class="side-val">5.14 <span class="down" style="font-size:8px">▼</span></div></div>
+          <div class="side-row"><div class="side-key">USD/NGN</div><div class="side-val">1,602 <span class="down" style="font-size:8px">▼</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="sep-line"></div>
+  <!-- HOME FIELD -->
+  <section class="home-field">
+    <div class="hf-head">
+      <div><div class="hm-tag" style="margin-bottom:6px;">The Field</div><div class="hm-h">From the Dispatch</div></div>
+      <button class="more-btn" onclick="showPage('field')">All Articles</button>
+    </div>
+    <div class="art-wrap">
+      <a href="https://wafi.co/2026/06/14/the-man-with-the-vineyard-family-legacy/" target="_blank" class="af">
+        <div class="af-img"><img src="https://wafi.co/wp-content/uploads/2026/06/IMG_2553.jpg" alt="" loading="lazy"/></div>
+        <div class="af-body"><div class="art-tag">Field Report · June 2026 · Latest</div><div class="af-title">What a Winetasting in Portugal Taught Me about Raising Another Generation of Farming</div><p class="af-ex">A Sunday evening in Portugal and an unexpected vineyard visit turned into a meditation on legacy, land, and what it means to hand something living down to the next generation.</p><div class="af-date">June 14, 2026</div><div class="art-read">Read Article</div></div>
+      </a>
+      <div class="art-grid">
+        <a href="https://wafi.co/2026/05/31/the-honey-trade-opportunity-hiding-in-west-africa/" target="_blank" class="ac"><div class="ac-img"><img src="https://wafi.co/wp-content/uploads/2026/05/IMG_8234.jpg" alt="" loading="lazy"/></div><div class="ac-body"><div class="art-tag">Market Intelligence · May 2026</div><div class="ac-title">The Honey Trade Opportunity Hiding in West Africa</div><p class="ac-ex">What began as a conversation about beekeeping revealed a much larger shift in global agricultural trade.</p><div class="ac-meta">May 31, 2026</div></div></a>
+        <a href="https://wafi.co/2026/05/17/regenerative-coffee-farming/" target="_blank" class="ac"><div class="ac-img"><img src="https://wafi.co/wp-content/uploads/2026/05/PHOTO-2026-05-17-15-03-58.jpg" alt="" loading="lazy"/></div><div class="ac-body"><div class="art-tag">Agronomy · May 2026</div><div class="ac-title">Regenerative Coffee Farming: Old Wisdom Repackaged</div><p class="ac-ex">Somewhere along the way, the agricultural industrial complex forgot that the land is not a machine.</p><div class="ac-meta">May 17, 2026</div></div></a>
+        <a href="https://wafi.co/2026/05/03/why-smuggling-persists-in-west-africa-pricing-borders-and-market-failure/" target="_blank" class="ac"><div class="ac-img"><img src="https://wafi.co/wp-content/uploads/2026/05/IMG_1999.jpg" alt="" loading="lazy"/></div><div class="ac-body"><div class="art-tag">Trade Analysis · May 2026</div><div class="ac-title">Why Smuggling Persists in West Africa: Pricing, Borders, and Market Failure</div><p class="ac-ex">Inside West Africa's informal cocoa and coffee routes, where survival economics collide.</p><div class="ac-meta">May 3, 2026</div></div></a>
+        <a href="https://wafi.co/2026/04/19/what-if-origin-set-the-price-of-coffee/" target="_blank" class="ac"><div class="ac-img"><img src="https://wafi.co/wp-content/uploads/2026/04/IMG_7764-2.jpg" alt="" loading="lazy"/></div><div class="ac-body"><div class="art-tag">Perspectives · April 2026</div><div class="ac-title">What if Origin Set the Price of Coffee?</div><p class="ac-ex">Rethinking who defines value in a market built far from where coffee actually begins.</p><div class="ac-meta">April 19, 2026</div></div></a>
+        <a href="https://wafi.co/2026/04/05/geopolitics-coffee-supply-chain/" target="_blank" class="ac"><div class="ac-img"><img src="https://wafi.co/wp-content/uploads/2026/04/Untitled-design-50-e1775417985184.png" alt="" loading="lazy"/></div><div class="ac-body"><div class="art-tag">Geopolitics · April 2026</div><div class="ac-title">Shipping Disruptions, War, and Commodities: Why Your Cup Is More Political Than Ever</div><p class="ac-ex">Conflict and shifting trade flows quietly reshape the system behind every sip.</p><div class="ac-meta">April 5, 2026</div></div></a>
+        <a href="https://wafi.co/2026/03/22/wafi-rebirth/" target="_blank" class="ac"><div class="ac-img"><img src="https://wafi.co/wp-content/uploads/2026/03/P1000964-1-scaled.jpg" alt="" loading="lazy"/></div><div class="ac-body"><div class="art-tag">Origin Story · March 2026</div><div class="ac-title">The WAFI Rebirth: Why Failure Was Never an Option Despite Hitting Rock Bottom</div><p class="ac-ex">Born in the rainforest, built from the commodity markets — the story of how WAFI came back.</p><div class="ac-meta">March 22, 2026</div></div></a>
+      </div>
+    </div>
+  </section>
+  <footer><div class="fb" onclick="showPage('home')">Trade &amp; Field<span>by WAFI</span></div><div class="fl"><button onclick="showPage('trade')">Trade</button><button onclick="showPage('field')">Field</button><a href="https://wafi.co" target="_blank">WAFI.co</a></div><div class="fc">© 2026 WAFI</div></footer>
+</div>
+
+<!-- ════════════════════════════════════════
+     TRADE DASHBOARD
+════════════════════════════════════════ -->
+<div id="page-trade" class="page trade-page">
+  <!-- HEADER -->
+  <div class="trade-header">
+    <div class="th-left">
+      <div class="th-eyebrow">Market Intelligence · WAFI</div>
+      <div class="th-title">The Trade</div>
+      <div class="th-sub">Cocoa &amp; Coffee · Prices · Open Interest · Weather · Positioning</div>
+    </div>
+    <div class="th-right">
+      <div class="live-badge"><span class="pulse"></span> Live · ICE New York &amp; LIFFE London</div>
+      <div class="th-stamp">Jun 23, 2026 · 14:32 EST · 19:32 BST</div>
+    </div>
+  </div>
+
+  <!-- SUMMARY STRIP -->
+  <div class="summary-strip">
+    <div class="ss-cell"><div class="ss-label">Cocoa CC1</div><div class="ss-val">9,842</div><div class="ss-chg up">▲ +120 · +1.24%</div><div class="ss-sub">USD/MT</div></div>
+    <div class="ss-cell"><div class="ss-label">Arabica KC1</div><div class="ss-val">3.187</div><div class="ss-chg up">▲ +0.026 · +0.83%</div><div class="ss-sub">USD/lb</div></div>
+    <div class="ss-cell"><div class="ss-label">Robusta RC1</div><div class="ss-val">5,312</div><div class="ss-chg down">▼ −10 · −0.18%</div><div class="ss-sub">USD/MT</div></div>
+    <div class="ss-cell"><div class="ss-label">Cocoa Open Interest</div><div class="ss-val">214,830</div><div class="ss-chg up">▲ +2,140 contracts</div><div class="ss-sub">ICE</div></div>
+    <div class="ss-cell"><div class="ss-label">Net Spec Cocoa</div><div class="ss-val" style="color:var(--amber)">Long</div><div class="ss-chg neutral">+34,100 net longs</div><div class="ss-sub">COT Report</div></div>
+    <div class="ss-cell"><div class="ss-label">USD Index (DXY)</div><div class="ss-val">104.2</div><div class="ss-chg down">▼ −0.22%</div><div class="ss-sub">Bearish USD → Bullish Softs</div></div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="dash-grid">
+
+    <!-- LEFT: Prices + Chart + Curves + COT -->
+    <div class="dash-main">
+      <div class="bar-head"><span class="bar-label">Front Month Prices</span><span class="bar-time">Click row to switch chart</span></div>
+      <table class="ptable" id="priceTable">
+        <thead><tr><th>Contract</th><th>Last</th><th>Chg</th><th>%</th><th>High</th><th>Low</th><th>Settle</th><th>Volume</th><th>OI</th><th>5D</th></tr></thead>
+        <tbody>
+          <tr class="selected" onclick="selectRow(this,'Cocoa · ICE CC1','9,842','▲ +120 · +1.24%','cocoa')">
+            <td><span class="pn">Cocoa</span><span class="ps">ICE · CC1 · USD/MT</span></td>
+            <td class="pp">9,842</td><td class="up">+120</td><td class="up">+1.24%</td>
+            <td class="neutral">9,901</td><td class="neutral">9,714</td><td class="neutral">9,820</td>
+            <td class="pvol">18,402</td><td class="pvol">214,830</td>
+            <td><span class="spark"><span class="sb u" style="height:40%"></span><span class="sb u" style="height:58%"></span><span class="sb u" style="height:72%"></span><span class="sb u" style="height:88%"></span><span class="sb u" style="height:100%"></span></span></td>
+          </tr>
+          <tr onclick="selectRow(this,'Arabica Coffee · ICE KC1','3.187','▲ +0.026 · +0.83%','arabica')">
+            <td><span class="pn">Arabica Coffee</span><span class="ps">ICE · KC1 · USD/lb</span></td>
+            <td class="pp">3.187</td><td class="up">+0.026</td><td class="up">+0.83%</td>
+            <td class="neutral">3.210</td><td class="neutral">3.155</td><td class="neutral">3.181</td>
+            <td class="pvol">24,118</td><td class="pvol">188,412</td>
+            <td><span class="spark"><span class="sb u" style="height:52%"></span><span class="sb u" style="height:65%"></span><span class="sb u" style="height:78%"></span><span class="sb u" style="height:91%"></span><span class="sb u" style="height:100%"></span></span></td>
+          </tr>
+          <tr onclick="selectRow(this,'Robusta Coffee · LIFFE RC1','5,312','▼ −10 · −0.18%','robusta')">
+            <td><span class="pn">Robusta Coffee</span><span class="ps">LIFFE · RC1 · USD/MT</span></td>
+            <td class="pp">5,312</td><td class="down">−10</td><td class="down">−0.18%</td>
+            <td class="neutral">5,388</td><td class="neutral">5,290</td><td class="neutral">5,322</td>
+            <td class="pvol">9,841</td><td class="pvol">91,204</td>
+            <td><span class="spark"><span class="sb d" style="height:100%"></span><span class="sb d" style="height:84%"></span><span class="sb d" style="height:72%"></span><span class="sb d" style="height:64%"></span><span class="sb d" style="height:57%"></span></span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- CHART -->
+      <div class="bar-head" style="margin-top:2px"><span class="bar-label" id="chartTitle">Price Chart · Cocoa CC1</span><span class="bar-time" id="chartSubtitle">1W View · USD/MT</span></div>
+      <div class="chart-section">
+        <div class="cs-head">
+          <div><div class="cs-name" id="csName">Cocoa · ICE CC1</div><div class="cs-meta">USD / Metric Ton · Front Month</div></div>
+          <div><div class="cs-price" id="csPrice">9,842</div><div class="cs-chg up" id="csChg">▲ +120 · +1.24%</div></div>
+        </div>
+        <div class="chart-tabs">
+          <button class="ct">1D</button><button class="ct active">1W</button><button class="ct">1M</button><button class="ct">3M</button><button class="ct">1Y</button>
+        </div>
+        <div class="canvas-wrap"><canvas id="tradeChart" height="190"></canvas><div class="caxis"><span>Jun 17</span><span>Jun 18</span><span>Jun 19</span><span>Jun 20</span><span>Jun 21</span><span>Jun 23</span></div></div>
+      </div>
+
+      <!-- FORWARD CURVES -->
+      <div class="bar-head" style="margin-top:2px"><span class="bar-label">Forward Curve · Cocoa</span><span class="bar-time">ICE Contract Calendar</span></div>
+      <table class="curve-table">
+        <thead><tr><th>Contract</th><th>Expiry</th><th>Last</th><th>Chg%</th><th>OI</th><th>Curve</th></tr></thead>
+        <tbody>
+          <tr><td>CC Jul '26 <span class="front-badge">FRONT</span></td><td>Jul 14</td><td class="pp" style="font-size:12px">9,842</td><td class="up">+1.24%</td><td class="pvol">214,830</td><td class="curve-bar-cell"><div class="curve-bar" style="width:78%"></div></td></tr>
+          <tr><td>CC Sep '26</td><td>Sep 15</td><td class="pp" style="font-size:12px">9,910</td><td class="down">−0.41%</td><td class="pvol">98,220</td><td class="curve-bar-cell"><div class="curve-bar" style="width:82%"></div></td></tr>
+          <tr><td>CC Dec '26</td><td>Dec 14</td><td class="pp" style="font-size:12px">10,140</td><td class="up">+0.62%</td><td class="pvol">44,110</td><td class="curve-bar-cell"><div class="curve-bar" style="width:88%"></div></td></tr>
+          <tr><td>CC Mar '27</td><td>Mar 15</td><td class="pp" style="font-size:12px">10,380</td><td class="up">+0.88%</td><td class="pvol">21,840</td><td class="curve-bar-cell"><div class="curve-bar" style="width:94%"></div></td></tr>
+          <tr><td>CC May '27</td><td>May 17</td><td class="pp" style="font-size:12px">10,490</td><td class="up">+0.44%</td><td class="pvol">8,920</td><td class="curve-bar-cell"><div class="curve-bar" style="width:100%"></div></td></tr>
+        </tbody>
+      </table>
+
+      <div class="bar-head" style="margin-top:2px"><span class="bar-label">Forward Curve · Arabica Coffee</span><span class="bar-time">ICE Contract Calendar</span></div>
+      <table class="curve-table">
+        <thead><tr><th>Contract</th><th>Expiry</th><th>Last</th><th>Chg%</th><th>OI</th><th>Curve</th></tr></thead>
+        <tbody>
+          <tr><td>KC Jul '26 <span class="front-badge">FRONT</span></td><td>Jul 21</td><td class="pp" style="font-size:12px">3.187</td><td class="up">+0.83%</td><td class="pvol">188,412</td><td class="curve-bar-cell"><div class="curve-bar" style="width:72%"></div></td></tr>
+          <tr><td>KC Sep '26</td><td>Sep 18</td><td class="pp" style="font-size:12px">3.205</td><td class="up">+1.07%</td><td class="pvol">76,300</td><td class="curve-bar-cell"><div class="curve-bar" style="width:78%"></div></td></tr>
+          <tr><td>KC Dec '26</td><td>Dec 18</td><td class="pp" style="font-size:12px">3.240</td><td class="up">+0.50%</td><td class="pvol">38,110</td><td class="curve-bar-cell"><div class="curve-bar" style="width:86%"></div></td></tr>
+          <tr><td>KC Mar '27</td><td>Mar 19</td><td class="pp" style="font-size:12px">3.280</td><td class="neutral">+0.12%</td><td class="pvol">14,220</td><td class="curve-bar-cell"><div class="curve-bar" style="width:93%"></div></td></tr>
+          <tr><td>KC May '27</td><td>May 19</td><td class="pp" style="font-size:12px">3.310</td><td class="neutral">+0.09%</td><td class="pvol">5,840</td><td class="curve-bar-cell"><div class="curve-bar" style="width:100%"></div></td></tr>
+        </tbody>
+      </table>
+
+      <!-- COT / POSITIONING -->
+      <div class="bar-head" style="margin-top:2px"><span class="bar-label">COT · Commitment of Traders</span><span class="bar-time">CFTC · Week ending Jun 17, 2026</span></div>
+      <div class="cot-grid">
+        <div class="cot-card"><div class="cot-label">Managed Money · Cocoa Long</div><div class="cot-val up">+68,420</div><div class="cot-sub">▲ +3,210 vs prior week</div></div>
+        <div class="cot-card"><div class="cot-label">Managed Money · Cocoa Short</div><div class="cot-val down">−34,320</div><div class="cot-sub">▼ −1,080 vs prior week</div></div>
+        <div class="cot-card"><div class="cot-label">Managed Money · Arabica Long</div><div class="cot-val up">+54,110</div><div class="cot-sub">▲ +1,840 vs prior week</div></div>
+        <div class="cot-card"><div class="cot-label">Managed Money · Arabica Short</div><div class="cot-val down">−28,440</div><div class="cot-sub">▼ −620 vs prior week</div></div>
+      </div>
+      <div class="net-bar-wrap">
+        <div class="net-bar-label">Net Speculative Position · Cocoa (Managed Money)</div>
+        <div class="net-bar"><div class="net-bar-fill" style="left:50%;width:27%;background:var(--green);border-radius:0 4px 4px 0;"></div><div class="net-bar-mid"></div></div>
+        <div class="net-bar-note"><span>Max Short</span><span>Net Long: +34,100</span><span>Max Long</span></div>
+      </div>
+      <div class="net-bar-wrap">
+        <div class="net-bar-label">Net Speculative Position · Arabica (Managed Money)</div>
+        <div class="net-bar"><div class="net-bar-fill" style="left:50%;width:19%;background:var(--green);border-radius:0 4px 4px 0;"></div><div class="net-bar-mid"></div></div>
+        <div class="net-bar-note"><span>Max Short</span><span>Net Long: +25,670</span><span>Max Long</span></div>
+      </div>
+    </div>
+
+    <!-- MIDDLE: Weather + Season -->
+    <div class="dash-right">
+      <div class="bar-head"><span class="bar-label">Origin Weather Forecasts</span><span class="bar-time">7-Day Outlook</span></div>
+      <div class="wx-grid">
+        <div class="wx-card cocoa">
+          <div class="wx-commodity">Cocoa</div>
+          <div class="wx-country">Côte d'Ivoire</div>
+          <div class="wx-region">Abidjan · Main Crop Zone</div>
+          <div class="wx-temp">31°C</div>
+          <div class="wx-condition">Partly Cloudy · Intermittent Dry</div>
+          <div class="wx-detail">Humidity: 74% · Wind: 12 km/h</div>
+          <div class="wx-detail">7-Day: Dry spell likely</div>
+          <div class="wx-alert">⚠ Dry stress risk mid-week</div>
+        </div>
+        <div class="wx-card cocoa">
+          <div class="wx-commodity">Cocoa</div>
+          <div class="wx-country">Ghana</div>
+          <div class="wx-region">Ashanti Region · Light Crop</div>
+          <div class="wx-temp">28°C</div>
+          <div class="wx-condition">Light Rain · Good Soil Moisture</div>
+          <div class="wx-detail">Humidity: 82% · Wind: 8 km/h</div>
+          <div class="wx-detail">7-Day: Moderate rainfall expected</div>
+          <div class="wx-good">✓ Favorable for pod development</div>
+        </div>
+        <div class="wx-card cocoa">
+          <div class="wx-commodity">Cocoa</div>
+          <div class="wx-country">Nigeria</div>
+          <div class="wx-region">Cross River State</div>
+          <div class="wx-temp">33°C</div>
+          <div class="wx-condition">Dry · Above Average Temp</div>
+          <div class="wx-detail">Humidity: 61% · Wind: 15 km/h</div>
+          <div class="wx-detail">7-Day: Hot, minimal rainfall</div>
+          <div class="wx-alert">⚠ Heat stress concerns</div>
+        </div>
+        <div class="wx-card coffee">
+          <div class="wx-commodity coffee">Coffee</div>
+          <div class="wx-country">Brazil · Cerrado</div>
+          <div class="wx-region">Minas Gerais · Harvest</div>
+          <div class="wx-temp">22°C</div>
+          <div class="wx-condition">Dry Season · Clear Skies</div>
+          <div class="wx-detail">Humidity: 45% · Wind: 18 km/h</div>
+          <div class="wx-detail">7-Day: Dry, ideal for harvest</div>
+          <div class="wx-good">✓ Ideal harvest conditions</div>
+        </div>
+        <div class="wx-card coffee">
+          <div class="wx-commodity coffee">Coffee</div>
+          <div class="wx-country">Colombia</div>
+          <div class="wx-region">Huila · Mid-Crop</div>
+          <div class="wx-temp">18°C</div>
+          <div class="wx-condition">Overcast · Light Showers</div>
+          <div class="wx-detail">Humidity: 88% · Wind: 6 km/h</div>
+          <div class="wx-detail">7-Day: La Niña pattern active</div>
+          <div class="wx-alert">⚠ Excess rain may delay drying</div>
+        </div>
+        <div class="wx-card coffee">
+          <div class="wx-commodity coffee">Robusta</div>
+          <div class="wx-country">Vietnam</div>
+          <div class="wx-region">Central Highlands · Harvest End</div>
+          <div class="wx-temp">29°C</div>
+          <div class="wx-condition">Humid · Early Rains Arriving</div>
+          <div class="wx-detail">Humidity: 79% · Wind: 11 km/h</div>
+          <div class="wx-detail">7-Day: Rainy season onset</div>
+          <div class="wx-good">✓ Harvest complete, rains welcome</div>
+        </div>
+        <div class="wx-card coffee">
+          <div class="wx-commodity coffee">Coffee</div>
+          <div class="wx-country">Ethiopia</div>
+          <div class="wx-region">Yirgacheffe · Flowering</div>
+          <div class="wx-temp">24°C</div>
+          <div class="wx-condition">Seasonal Rain · Good Coverage</div>
+          <div class="wx-detail">Humidity: 76% · Wind: 9 km/h</div>
+          <div class="wx-detail">7-Day: Steady rainfall forecast</div>
+          <div class="wx-good">✓ Excellent flowering conditions</div>
+        </div>
+        <div class="wx-card cocoa">
+          <div class="wx-commodity">Cocoa</div>
+          <div class="wx-country">Ecuador</div>
+          <div class="wx-region">Los Ríos · Main Harvest</div>
+          <div class="wx-temp">27°C</div>
+          <div class="wx-condition">Partly Cloudy · Light Rain</div>
+          <div class="wx-detail">Humidity: 80% · Wind: 7 km/h</div>
+          <div class="wx-detail">7-Day: Stable, light intermittent rain</div>
+          <div class="wx-good">✓ Good for fine flavor production</div>
+        </div>
+      </div>
+
+      <!-- CROP CALENDAR / SEASONALITY -->
+      <div class="bar-head" style="margin-top:2px"><span class="bar-label">Crop Calendar · Season Progress</span><span class="bar-time">2025/26 Season</span></div>
+      <div class="season-grid">
+        <div class="season-card"><div class="season-country">Côte d'Ivoire</div><div class="season-label">Cocoa · Main Crop</div><div class="season-phase">Mid-Season</div><div class="season-pct"><div class="season-pct-fill" style="width:62%"></div></div></div>
+        <div class="season-card"><div class="season-country">Ghana</div><div class="season-label">Cocoa · Light Crop</div><div class="season-phase">Early Season</div><div class="season-pct"><div class="season-pct-fill" style="width:28%"></div></div></div>
+        <div class="season-card"><div class="season-country">Brazil</div><div class="season-label">Arabica · Harvest</div><div class="season-phase">Peak Harvest</div><div class="season-pct"><div class="season-pct-fill sage" style="width:75%"></div></div></div>
+        <div class="season-card"><div class="season-country">Colombia</div><div class="season-label">Arabica · Mid-Crop</div><div class="season-phase">In Progress</div><div class="season-pct"><div class="season-pct-fill sage" style="width:45%"></div></div></div>
+        <div class="season-card"><div class="season-country">Vietnam</div><div class="season-label">Robusta · Main Crop</div><div class="season-phase">Harvest Complete</div><div class="season-pct"><div class="season-pct-fill sage" style="width:98%"></div></div></div>
+        <div class="season-card"><div class="season-country">Ethiopia</div><div class="season-label">Arabica · Flowering</div><div class="season-phase">Pre-Harvest</div><div class="season-pct"><div class="season-pct-fill sage" style="width:12%"></div></div></div>
+      </div>
+
+ 
+      <!-- CERTIFIED STOCKS -->
+      <div class="bar-head" style="margin-top:2px"><span class="bar-label">Exchange Certified Stocks</span><span class="bar-time">ICE Warehouses</span></div>
+      <div class="storey-row"><div class="storey-label">Cocoa Certified Stocks</div><div class="storey-val">32,814 MT</div></div>
+      <div class="storey-row"><div class="storey-label">Pending Certification</div><div class="storey-val neutral">4,120 MT</div></div>
+      <div class="storey-row"><div class="storey-label">Arabica Certified Stocks</div><div class="storey-val down">318,420 Bags</div></div>
+      <div class="storey-row"><div class="storey-label">Decertified This Week</div><div class="storey-val down">-12,400 Bags</div></div>
+      <div class="storey-row"><div class="storey-label">Robusta (LIFFE) Stocks</div><div class="storey-val up">98,400 MT</div></div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="dash-sidebar">
+      <div class="sb-section">
+        <div class="sb-head"><span class="sb-label">Origin FX Rates</span><span class="sb-sub">Live</span></div>
+        <div class="fx-row"><div><div class="fx-pair">USD/GHS</div><div class="fx-sub">Ghana Cedi</div></div><div class="fx-right"><div class="fx-rate">15.42</div><div class="fx-chg down">&#9660; -0.06%</div></div></div>
+        <div class="fx-row"><div><div class="fx-pair">USD/XOF</div><div class="fx-sub">W. Africa CFA Franc</div></div><div class="fx-right"><div class="fx-rate">616.4</div><div class="fx-chg up">&#9650; +0.12%</div></div></div>
+        <div class="fx-row"><div><div class="fx-pair">USD/NGN</div><div class="fx-sub">Nigerian Naira</div></div><div class="fx-right"><div class="fx-rate">1,602</div><div class="fx-chg down">&#9660; -0.31%</div></div></div>
+        <div class="fx-row"><div><div class="fx-pair">USD/BRL</div><div class="fx-sub">Brazilian Real</div></div><div class="fx-right"><div class="fx-rate">5.14</div><div class="fx-chg down">&#9660; -0.09%</div></div></div>
+        <div class="fx-row"><div><div class="fx-pair">USD/COP</div><div class="fx-sub">Colombian Peso</div></div><div class="fx-right"><div class="fx-rate">4,088</div><div class="fx-chg neutral">0.00%</div></div></div>
+        <div class="fx-row"><div><div class="fx-pair">USD/VND</div><div class="fx-sub">Vietnamese Dong</div></div><div class="fx-right"><div class="fx-rate">25,340</div><div class="fx-chg down">&#9660; -0.04%</div></div></div>
+        <div class="fx-row"><div><div class="fx-pair">EUR/USD</div><div class="fx-sub">Euro</div></div><div class="fx-right"><div class="fx-rate">1.0842</div><div class="fx-chg up">&#9650; +0.18%</div></div></div>
+        <div class="fx-row"><div><div class="fx-pair">GBP/USD</div><div class="fx-sub">British Pound</div></div><div class="fx-right"><div class="fx-rate">1.2714</div><div class="fx-chg up">&#9650; +0.11%</div></div></div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-head"><span class="sb-label">Key Spreads</span><span class="sb-sub">Basis &amp; Arb</span></div>
+        <div class="spread-row"><div class="spread-name">Cocoa CC1-CC3 (Cal Spread)</div><div class="spread-val down">-298</div></div>
+        <div class="spread-row"><div class="spread-name">Arabica KC1-KC3</div><div class="spread-val down">-0.053</div></div>
+        <div class="spread-row"><div class="spread-name">Arabica-Robusta Differential</div><div class="spread-val neutral">+1,142</div></div>
+        <div class="spread-row"><div class="spread-name">London-NY Cocoa Arb</div><div class="spread-val up">+184</div></div>
+        <div class="spread-row"><div class="spread-name">Robusta RC1-RC3</div><div class="spread-val down">-88</div></div>
+        <div class="spread-row"><div class="spread-name">NYC-LIFFE Cocoa Diff</div><div class="spread-val up">+$210/MT</div></div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-head"><span class="sb-label">Market Intelligence</span><span class="sb-sub">News &amp; Flows</span></div>
+        <div class="news-item"><div class="news-date">Jun 23, 2026</div><div class="news-head">ICE cocoa stocks drop to 4-year low as West African arrivals slow ahead of mid-crop.</div><span class="news-tag bullish">Bullish Cocoa</span></div>
+        <div class="news-item"><div class="news-date">Jun 23, 2026</div><div class="news-head">Brazil Arabica harvest 72% complete vs 68% last year - pace ahead of schedule.</div><span class="news-tag bearish">Bearish Arabica</span></div>
+        <div class="news-item"><div class="news-date">Jun 22, 2026</div><div class="news-head">CFA franc stable after ECB holds rates; minimal FX impact on West African origin pricing.</div><span class="news-tag neutral">Neutral</span></div>
+        <div class="news-item"><div class="news-date">Jun 22, 2026</div><div class="news-head">Colombia mid-crop estimates revised lower by 200k bags on excess rainfall in Huila/Narinyo.</div><span class="news-tag bullish">Bullish Arabica</span></div>
+        <div class="news-item"><div class="news-date">Jun 21, 2026</div><div class="news-head">EUDR compliance deadline pressure building - origins accelerating documentation.</div><span class="news-tag neutral">Regulatory</span></div>
+        <div class="news-item"><div class="news-date">Jun 20, 2026</div><div class="news-head">Vietnam robusta exports up 18% YoY in May; stout supply keeps lid on LIFFE.</div><span class="news-tag bearish">Bearish Robusta</span></div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-head"><span class="sb-label">Production Estimates</span><span class="sb-sub">2025/26 Season</span></div>
+        <div class="storey-row"><div class="storey-label">Global Cocoa Production</div><div class="storey-val">4.18M MT</div></div>
+        <div class="storey-row"><div class="storey-label">Cote d'Ivoire Crop</div><div class="storey-val">1.72M MT</div></div>
+        <div class="storey-row"><div class="storey-label">Ghana Crop</div><div class="storey-val">640K MT</div></div>
+        <div class="storey-row"><div class="storey-label">Global Coffee Production</div><div class="storey-val">174.5M Bags</div></div>
+        <div class="storey-row"><div class="storey-label">Brazil Total</div><div class="storey-val">66.4M Bags</div></div>
+        <div class="storey-row"><div class="storey-label">Vietnam Robusta</div><div class="storey-val">29.8M Bags</div></div>
+        <div class="storey-row"><div class="storey-label">Colombia</div><div class="storey-val">13.2M Bags</div></div>
+      </div>
+    </div>
+  </div><!-- /dash-grid -->
+  <footer><div class="fb" onclick="showPage('home')">Trade &amp; Field<span>by WAFI</span></div><div class="fl"><button onclick="showPage('home')">Home</button><button onclick="showPage('field')">Field</button><a href="https://wafi.co" target="_blank">WAFI.co</a></div><div class="fc">2026 WAFI - Market data for informational purposes only.</div></footer>
+</div>
+
+<!-- FIELD PAGE -->
+<div id="page-field" class="page field-page">
+  <section class="field-hero">
+    <div class="fh-inner">
+      <div class="eyebrow">The Field</div>
+      <h2>Trade<br><em>&amp; Field</em></h2>
+      <div class="byline" style="margin-top:16px;margin-bottom:0;">By WAFI</div>
+      <div class="fh-rule"></div>
+      <p class="fh-desc">WAFI's dispatch from the intersection of <strong>agriculture and trade.</strong> Part field report, part market briefing - delivering firsthand updates on growing conditions, agronomy, and production alongside <strong>sharp perspectives</strong> on the economic forces moving global commodities. Written from both origin in <strong>Africa</strong> and our outpost in <strong>New York,</strong> Trade &amp; Field offers a clear, practical look at how real-world conditions shape supply, pricing, and opportunity across the markets we operate in.</p>
+      <div class="origin-tags" style="padding-top:24px;justify-content:center;">
+        <span class="origin-tag">Origin - Africa</span>
+        <span class="origin-tag">Outpost - New York</span>
+      </div>
+    </div>
+    <div class="fh-foot"></div>
+  </section>
+  <div class="field-art-wrap">
+    <div class="fa-head">
+      <div><div style="font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:0.24em;text-transform:uppercase;color:var(--amber);margin-bottom:5px;">All Dispatches</div><div class="fa-title">From the Field</div></div>
+      <div class="fa-count">7 Articles</div>
+    </div>
+    <a href="https://wafi.co/2026/06/14/the-man-with-the-vineyard-family-legacy/" target="_blank" class="af">
+      <div class="af-img"><img src="https://wafi.co/wp-content/uploads/2026/06/IMG_2553.jpg" alt="" loading="lazy"/></div>
+      <div class="af-body"><div class="art-tag">Field Report - June 2026 - Latest</div><div class="af-title">What a Winetasting in Portugal Taught Me about Raising Another Generation of Farming</div><p class="af-ex">A Sunday evening in Portugal and an unexpected vineyard visit turned into a meditation on legacy, land, and what it means to hand something living down to the next generation.</p><div class="af-date">June 14, 2026</div><div class="art-read">Read Article</div></div>
+    </a>
+    <div class="art-grid" style="margin-top:3px;">
+      <a href="https://wafi.co/2026/05/31/the-honey-trade-opportunity-hiding-in-west-africa/" target="_blank" class="ac"><div class="ac-img"><img src="https://wafi.co/wp-content/uploads/2026/05/IMG_8234.jpg" alt="" loading="lazy"/></div><div class="ac-body"><div class="art-tag">Market Intelligence - May 2026</div><div class="ac-title">The Honey Trade Opportunity Hiding in West Africa</div><p class="ac-ex">What began as a conversation about beekeeping revealed a much larger shift in global agricultural trade.</p><div class="ac-meta">May 31, 2026</div></div></a>
+      <a href="https://wafi.co/2026/05/17/regenerative-coffee-farming/" target="_blank" class="ac"><div class="ac-img"><img src="https://wafi.co/wp-content/uploads/2026/05/PHOTO-2026-05-17-15-03-58.jpg" alt="" loading="lazy"/></div><div class="ac-body"><div class="art-tag">Agronomy - May 2026</div><div class="ac-title">Regenerative Coffee Farming: Old Wisdom Repackaged</div><p class="ac-ex">Somewhere along the way, the agricultural industrial complex forgot that the land is not a machine.</p><div class="ac-meta">May 17, 2026</div></div></a>
+      <a href="https://wafi.co/2026/05/03/why-smuggling-persists-in-west-africa-pricing-borders-and-market-failure/" target="_blank" class="ac"><div class="ac-img"><img src="https://wafi.co/wp-content/uploads/2026/05/IMG_1999.jpg" alt="" loading="lazy"/></div><div class="ac-body"><div class="art-tag">Trade Analysis - May 2026</div><div class="ac-title">Why Smuggling Persists in West Africa: Pricing, Borders, and Market Failure</div><p class="ac-ex">Inside West Africa's informal cocoa and coffee routes, where survival economics collide.</p><div class="ac-meta">May 3, 2026</div></div></a>
+      <a href="https://wafi.co/2026/04/19/what-if-origin-set-the-price-of-coffee/" target="_blank" class="ac"><div class="ac-img"><img src="https://wafi.co/wp-content/uploads/2026/04/IMG_7764-2.jpg" alt="" loading="lazy"/></div><div class="ac-body"><div class="art-tag">Perspectives - April 2026</div><div class="ac-title">What if Origin Set the Price of Coffee?</div><p class="ac-ex">Rethinking who defines value in a market built far from where coffee actually begins.</p><div class="ac-meta">April 19, 2026</div></div></a>
+      <a href="https://wafi.co/2026/04/05/geopolitics-coffee-supply-chain/" target="_blank" class="ac"><div class="ac-img"><img src="https://wafi.co/wp-content/uploads/2026/04/Untitled-design-50-e1775417985184.png" alt="" loading="lazy"/></div><div class="ac-body"><div class="art-tag">Geopolitics - April 2026</div><div class="ac-title">Shipping Disruptions, War, and Commodities: Why Your Cup Is More Political Than Ever</div><p class="ac-ex">Conflict and shifting trade flows quietly reshape the system behind every sip.</p><div class="ac-meta">April 5, 2026</div></div></a>
+      <a href="https://wafi.co/2026/03/22/wafi-rebirth/" target="_blank" class="ac"><div class="ac-img"><img src="https://wafi.co/wp-content/uploads/2026/03/P1000964-1-scaled.jpg" alt="" loading="lazy"/></div><div class="ac-body"><div class="art-tag">Origin Story - March 2026</div><div class="ac-title">The WAFI Rebirth: Why Failure Was Never an Option Despite Hitting Rock Bottom</div><p class="ac-ex">Born in the rainforest, built from the commodity markets - the story of how WAFI came back.</p><div class="ac-meta">March 22, 2026</div></div></a>
+    </div>
+  </div>
+  <footer><div class="fb" onclick="showPage('home')">Trade &amp; Field<span>by WAFI</span></div><div class="fl"><button onclick="showPage('home')">Home</button><button onclick="showPage('trade')">Trade</button><a href="https://wafi.co" target="_blank">WAFI.co</a></div><div class="fc">2026 WAFI. All rights reserved.</div></footer>
+</div>
+
+<script>
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  var btn = document.querySelector('.nav-btn.' + name);
+  if (btn) btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (name === 'home') setTimeout(function(){drawChart('homeChart',cocoa1W,150);},60);
+  if (name === 'trade') setTimeout(function(){drawChart('tradeChart',currentData,190);},60);
+}
+var cocoa1W =  [9580,9620,9555,9640,9700,9688,9714,9740,9760,9720,9780,9810,9795,9820,9842];
+var arabica1W = [3.08,3.10,3.07,3.12,3.14,3.13,3.15,3.16,3.17,3.15,3.17,3.18,3.17,3.19,3.187];
+var robusta1W = [5380,5360,5395,5370,5350,5360,5340,5330,5345,5320,5310,5325,5315,5308,5312];
+var currentData = cocoa1W;
+function drawChart(id, data, h) {
+  var canvas = document.getElementById(id);
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  var W = canvas.parentElement.clientWidth - 26;
+  var H = h || 160;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+  var minV = Math.min.apply(null,data)*0.998, maxV = Math.max.apply(null,data)*1.002;
+  var toY = function(v){return H-16-((v-minV)/(maxV-minV))*(H-30);};
+  var toX = function(i){return 6+(i/(data.length-1))*(W-12);};
+  ctx.strokeStyle='rgba(242,232,217,0.04)'; ctx.lineWidth=1;
+  for(var i=0;i<=5;i++){var y=8+(i/5)*(H-22);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  var grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(212,124,15,0.2)');grad.addColorStop(1,'rgba(212,124,15,0.01)');
+  ctx.beginPath();ctx.moveTo(toX(0),toY(data[0]));
+  data.forEach(function(v,i){if(i>0)ctx.lineTo(toX(i),toY(v));});
+  ctx.lineTo(toX(data.length-1),H);ctx.lineTo(toX(0),H);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+  ctx.beginPath();ctx.strokeStyle='#D47C0F';ctx.lineWidth=2.5;ctx.lineJoin='round';
+  data.forEach(function(v,i){if(i===0)ctx.moveTo(toX(i),toY(v));else ctx.lineTo(toX(i),toY(v));});
+  ctx.stroke();
+  ctx.beginPath();ctx.arc(toX(data.length-1),toY(data[data.length-1]),4.5,0,Math.PI*2);
+  ctx.fillStyle='#D47C0F';ctx.fill();
+}
+var chartDataMap = {cocoa:cocoa1W,arabica:arabica1W,robusta:robusta1W};
+function selectRow(row,name,price,chg,type){
+  document.querySelectorAll('#priceTable tbody tr').forEach(function(r){r.classList.remove('selected');});
+  row.classList.add('selected');
+  document.getElementById('csName').textContent=name;
+  document.getElementById('csPrice').textContent=price;
+  var el=document.getElementById('csChg');
+  el.textContent=chg;
+  el.className='cs-chg '+(chg.indexOf('up')>-1||chg.indexOf('+')>-1?'up':'down');
+  document.getElementById('chartTitle').textContent='Price Chart - '+name;
+  currentData=chartDataMap[type];
+  drawChart('tradeChart',currentData,190);
+}
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('ct')){
+    var wrap=e.target.closest('.chart-tabs');
+    wrap.querySelectorAll('.ct').forEach(function(t){t.classList.remove('active');});
+    e.target.classList.add('active');
+  }
+});
+window.addEventListener('load',function(){drawChart('homeChart',cocoa1W,150);});
+window.addEventListener('resize',function(){
+  var active=document.querySelector('.page.active');
+  if(!active)return;
+  if(active.id==='page-home')drawChart('homeChart',cocoa1W,150);
+  if(active.id==='page-trade')drawChart('tradeChart',currentData,190);
+});
+</script>
+</body>
+</html>
